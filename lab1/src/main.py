@@ -14,6 +14,7 @@ time = np.linspace(0, (dataLen - 1) * delta, dataLen)
 amplitudeFrequency = fft(amplitudeTime)
 frequency = fftfreq(dataLen, delta)
 inverseAmplitudeTime = ifft(amplitudeFrequency).real
+write("../resources/audio/handelInvertido.wav",rate,inverseAmplitudeTime)
 fakedAmplitudeFrequency = amplitudeFrequency.copy()
 for x in range(12504,36557):
     fakedAmplitudeFrequency[x] = 0;
@@ -25,8 +26,13 @@ inverseFakedAmplitudeTime = ifft(fakedAmplitudeFrequency).real
 write("../resources/audio/handelTruncado.wav",rate,inverseFakedAmplitudeTime)
 
 # Cálculo de errores
-firstQuadraticError = np.sqrt(((inverseAmplitudeTime - amplitudeTime) ** 2).mean())
-secondQuadraticError = np.sqrt(((inverseFakedAmplitudeTime - amplitudeTime) ** 2).mean())
+firstQuadraticError = ((inverseAmplitudeTime - amplitudeTime) ** 2).mean()
+print("Error entre inversa y original: {}".format(firstQuadraticError))
+#Error 1:1.3468058436172885e-11
+secondQuadraticError = ((inverseFakedAmplitudeTime - amplitudeTime) ** 2).mean()
+print("Error inversa truncada y original: {}".format(secondQuadraticError))
+#Error 2:4073245.6646929947
+
 
 # # Gráfico de la transformada de fourier
 plt.figure(1)
