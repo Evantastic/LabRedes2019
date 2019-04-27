@@ -13,7 +13,7 @@ delta = 1/rate
 time = np.linspace(0, (dataLen - 1) * delta, dataLen)
 amplitudeFrequency = fft(amplitudeTime)
 frequency = fftfreq(dataLen, delta)
-inverseAmplitudeTime = ifft(amplitudeFrequency).real
+inverseAmplitudeTime = np.asarray(ifft(amplitudeFrequency).real, dtype=np.int16)
 write("../resources/audio/handelInvertido.wav",rate,inverseAmplitudeTime)
 fakedAmplitudeFrequency = amplitudeFrequency.copy()
 for x in range(12504,36557):
@@ -22,7 +22,7 @@ for x in range(12504,36557):
 for x in range(2000):
     fakedAmplitudeFrequency[x] = 0;
     fakedAmplitudeFrequency[73112 - x] = 0
-inverseFakedAmplitudeTime = ifft(fakedAmplitudeFrequency).real
+inverseFakedAmplitudeTime = np.asarray(ifft(fakedAmplitudeFrequency).real, dtype=np.int16)
 write("../resources/audio/handelTruncado.wav",rate,inverseFakedAmplitudeTime)
 
 # Cálculo de errores
