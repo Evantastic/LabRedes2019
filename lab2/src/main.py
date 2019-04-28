@@ -8,7 +8,12 @@ def butter_bandpass(lowcut, highcut, rate, order):
     nyq = 0.5 * rate
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    if lowcut == 0:
+        b, a = butter(order, high, btype='lowpass')
+    elif highcut == 4000:
+        b, a = butter(order, low, btype='highpass')
+    else:
+        b, a = butter(order, [low, high], btype='bandpass')
     return b, a
 
 def pretty_bandpass(lowcut, highcut, rate, order, maximum=1):
@@ -41,10 +46,10 @@ for i in range(2):
     k = 4 + i
     w[i], h[i] = pretty_bandpass(280, 4000, rate, 5 * (i + 1), maximum=2.400e7)
     w[j], h[j] = pretty_bandpass(280, 1670, rate, 5 * (i + 1), maximum=2.400e7)
-    w[k], h[k] = pretty_bandpass(1, 1670, rate, 5 * (i + 1), maximum=2.400e7)
+    w[k], h[k] = pretty_bandpass(0, 1670, rate, 5 * (i + 1), maximum=2.400e7)
     filteredFrequencies[i] = filter(amplitudeFrequency, 280, 4000, rate, 5*(i + 1))
     filteredFrequencies[j] = filter(amplitudeFrequency, 280, 1670, rate, 5*(i + 1))
-    filteredFrequencies[k] = filter(amplitudeFrequency, 1, 1670, rate, 5*(i + 1))
+    filteredFrequencies[k] = filter(amplitudeFrequency, 0, 1670, rate, 5*(i + 1))
     inverseAmplitudeTime[i] = np.asarray(ifft(filteredFrequencies[i]).real, dtype=np.int16)
     inverseAmplitudeTime[j] = np.asarray(ifft(filteredFrequencies[j]).real, dtype=np.int16)
     inverseAmplitudeTime[k] = np.asarray(ifft(filteredFrequencies[k]).real, dtype=np.int16)
