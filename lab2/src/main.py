@@ -65,6 +65,18 @@ for i in range(2):
     write("../resources/audio/handelLowOrden%d.wav"%(5*(i + 1)), rate, inverseAmplitudeTime[k])
     write("../resources/audio/handelBandOrden%d.wav"%(5*(i + 1)), rate, inverseAmplitudeTime[j])
 
+# Errores
+for i in range(2):
+    j = 2 + i
+    k = 4 + i
+    orden = 5 * (i + 1)
+    ei = ((inverseAmplitudeTime[i] - amplitudeTime) ** 2).mean()
+    ej = ((inverseAmplitudeTime[j] - amplitudeTime) ** 2).mean()
+    ek = ((inverseAmplitudeTime[k] - amplitudeTime) ** 2).mean()
+    print("Error High Pass con Orden %d: %f"%(orden, ei))
+    print("Error Band Pass con Orden %d: %f"%(orden, ej))
+    print("Error Low Pass con Orden %d: %f"%(orden, ek))
+
 # Primer espectrograma
 plt.figure(1)
 plt.pcolormesh(t,f,np.log10(spectrum))
