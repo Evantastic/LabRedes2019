@@ -1,30 +1,28 @@
 from scipy.io.wavfile import read, write
 from scipy.fftpack import fft, ifft, fftfreq
 from scipy.signal import spectrogram, lfilter, lfilter_zi, butter, freqz
+from scipy.signal import firwin, convolve
 import matplotlib.pyplot as plt
 import numpy as np
 
-def butter_bandpass(lowcut, highcut, rate, order):
-    nyq = 0.5 * rate
-    low = lowcut / nyq
-    high = highcut / nyq
+def firpass(lowcut, highcut, rate, numtaps):
     if lowcut == 0:
-        b, a = butter(order, high, btype='lowpass')
+        fir = firwin(numtaps, highcut, fs=rate)
     elif highcut == 4000:
-        b, a = butter(order, low, btype='highpass')
+        fir = firwin(numtaps, lowcut, fs=rate, pass_zero=False)
     else:
-        b, a = butter(order, [low, high], btype='bandpass')
-    return b, a
+        fir = firwin(numtaps, [lowcut, highcut], fs=rate, pass_zero=False)
+    return fir
 
-def pretty_bandpass(lowcut, highcut, rate, order, maximum=1):
-    b, a = butter_bandpass(lowcut, highcut, rate, order)
-    w, h = freqz(b, a, worN=2000)
-    w, h = (rate * 0.5 / np.pi) * w, np.abs(h * maximum)
-    return w, h
 
-def filter(data, lowcut, highcut, rate, order):
-    b, a = butter_bandpass(lowcut, highcut, rate, order)
-    y = lfilter(b, a, data)
+def pretty_firpass(lowcut, highcut, rate, numtaps):
+    fir = firpass(lowcut, highcut, rate, numtaps)
+    xAxis = np.arange(-len(fir)//2, len(fir)//2)
+    return xAxis, fir
+
+def filter(data, lowcut, highcut, rate, numtaps):
+    fir = firpass(lowcut, highcut, rate, numtaps)
+    y = convolve(ifft(fir), data)
     return y
 
 # Analisis señal original
@@ -37,42 +35,38 @@ f,t,spectrum = spectrogram(amplitudeTime, rate)
 w = [None] * 6
 h = [None] * 6
 filteredFrequencies = [None] * 6
-inverseAmplitudeTime = [None] * 6
 fs = [None] * 6
 ts = [None] * 6
 spectrums = [None] * 6
 for i in range(2):
     j = 2 + i
     k = 4 + i
-    w[i], h[i] = pretty_bandpass(280, 4000, rate, 5 * (i + 1), maximum=2.400e7)
-    w[j], h[j] = pretty_bandpass(280, 1670, rate, 5 * (i + 1), maximum=2.400e7)
-    w[k], h[k] = pretty_bandpass(0, 1670, rate, 5 * (i + 1), maximum=2.400e7)
-    filteredFrequencies[i] = filter(amplitudeFrequency, 280, 4000, rate, 5*(i + 1))
-    filteredFrequencies[j] = filter(amplitudeFrequency, 280, 1670, rate, 5*(i + 1))
-    filteredFrequencies[k] = filter(amplitudeFrequency, 0, 1670, rate, 5*(i + 1))
-    inverseAmplitudeTime[i] = np.asarray(ifft(filteredFrequencies[i]).real, dtype=np.int16)
-    inverseAmplitudeTime[j] = np.asarray(ifft(filteredFrequencies[j]).real, dtype=np.int16)
-    inverseAmplitudeTime[k] = np.asarray(ifft(filteredFrequencies[k]).real, dtype=np.int16)
-    fs[i], ts[i], spectrums[i] = spectrogram(inverseAmplitudeTime[i], rate)
-    fs[j], ts[j], spectrums[j] = spectrogram(inverseAmplitudeTime[j], rate)
-    fs[k], ts[k], spectrums[k] = spectrogram(inverseAmplitudeTime[k], rate)
+    w[i], h[i] = pretty_firpass(280, 4000, rate, 2*i + 3)
+    w[j], h[j] = pretty_firpass(280, 1670, rate, 2*i + 3)
+    w[k], h[k] = pretty_firpass(0, 1670, rate, 2*i + 3)
+    filteredFrequencies[i] = np.asarray(filter(amplitudeTime, 280, 4000, rate, 2*i + 3).real, dtype=np.int16)
+    filteredFrequencies[j] = np.asarray(filter(amplitudeTime, 280, 1670, rate, 2*i + 3).real, dtype=np.int16)
+    filteredFrequencies[k] = np.asarray(filter(amplitudeTime, 0, 1670, rate, 2*i + 3).real, dtype=np.int16)
+    fs[i], ts[i], spectrums[i] = spectrogram(filteredFrequencies[i], rate)
+    fs[j], ts[j], spectrums[j] = spectrogram(filteredFrequencies[j], rate)
+    fs[k], ts[k], spectrums[k] = spectrogram(filteredFrequencies[k], rate)
 
 # Guardar archivos
 for i in range(2):
     j = 2 + i
     k = 4 + i
-    write("../resources/audio/handelHighOrden%d.wav"%(5*(i + 1)), rate, inverseAmplitudeTime[i])
-    write("../resources/audio/handelLowOrden%d.wav"%(5*(i + 1)), rate, inverseAmplitudeTime[k])
-    write("../resources/audio/handelBandOrden%d.wav"%(5*(i + 1)), rate, inverseAmplitudeTime[j])
+    write("../resources/audio/handelHighNumtaps%d.wav"%(5*(i + 1)), rate, filteredFrequencies[i])
+    write("../resources/audio/handelLowNumtaps%d.wav"%(5*(i + 1)), rate, filteredFrequencies[k])
+    write("../resources/audio/handelBandNumtaps%d.wav"%(5*(i + 1)), rate, filteredFrequencies[j])
 
 # Errores
 for i in range(2):
     j = 2 + i
     k = 4 + i
-    orden = 5 * (i + 1)
-    ei = ((inverseAmplitudeTime[i] - amplitudeTime) ** 2).mean()
-    ej = ((inverseAmplitudeTime[j] - amplitudeTime) ** 2).mean()
-    ek = ((inverseAmplitudeTime[k] - amplitudeTime) ** 2).mean()
+    orden = 2*i + 3
+    ei = ((filteredFrequencies[i] - amplitudeTime) ** 2).mean()
+    ej = ((filteredFrequencies[j] - amplitudeTime) ** 2).mean()
+    ek = ((filteredFrequencies[k] - amplitudeTime) ** 2).mean()
     print("Error High Pass con Orden %d: %f"%(orden, ei))
     print("Error Band Pass con Orden %d: %f"%(orden, ej))
     print("Error Low Pass con Orden %d: %f"%(orden, ek))
@@ -88,7 +82,6 @@ plt.colorbar().set_label("Amplitud [Db]")
 # Grafico de frequencias filtradas
 plt.figure(3)
 plt.clf()
-plt.plot(frequency, np.abs(amplitudeFrequency), label="original")
 for i in range(2):
     j = 2 + i
     k = 4 + i
