@@ -57,7 +57,6 @@ def fourier2D(image,type):
     else:
         plt.title('Transformada de Fourier Imagen Bordes')
     plt.colorbar()
-    plt.show()
 
 #Apertura de la imagen y almacenamiento como array
 image = Image.open("leena512.bmp")
@@ -98,3 +97,4 @@ print('Procesamiento finalizado')
 fourier2D(array_image,1)
 fourier2D(imgGauss,2)
 fourier2D(imgBordes,3)
+plt.show()
