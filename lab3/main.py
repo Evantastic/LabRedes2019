@@ -49,7 +49,8 @@ def fourier2D(image,type):
     f = np.fft.fft2(image)
     fshift = np.fft.fftshift(f)
     magnitude_spectrum = 20 * np.log(np.abs(fshift))
-    plt.figure(type), plt.imshow(magnitude_spectrum, cmap='gray')
+    plt.figure(type)
+    plt.imshow(magnitude_spectrum, cmap='gray',aspect='auto', interpolation='none', extent=[-255,255,-255,255])
     if type == 1:
         plt.title('Transformada de Fourier Imagen Original')
     elif type == 2:
