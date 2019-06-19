@@ -55,9 +55,9 @@ def plot(time, signal, signal_am, signal_fm, index, carrier_frequency, figure, c
 
 
 def test(carrier_frequency):
-    f = lambda z: np.cos(z*np.pi)
-    x = np.linspace(0, 10, 40000)
-    delta = 10.0/40000.0
+    f = lambda z: np.cos(0.05*z*np.pi)
+    x = np.linspace(0, 80, 40000)
+    delta = 80.0/40000.0
     y = list(map(f,x))
     integrales = []
     for i in range(len(y)):
@@ -84,4 +84,4 @@ def main():
     plt.show()
 
 
-test(100)
+test(2)
