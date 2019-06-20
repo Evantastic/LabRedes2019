@@ -1,7 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.integrate import simps
-from scipy.io.wavfile import read
+from scipy.io.wavfile import read, write
 from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 
@@ -38,7 +38,7 @@ def initialize_data(filename):
     integral_array = []
     for i in range(datalen):
         integral_array.append(simps(signal_array[:i+1], dx=delta))
-    return time_array, signal_array, np.array(integral_array), delta
+    return time_array, signal_array, np.array(integral_array), rate
 
 
 def plot_frequency(frequency, signal_am, signal_fm, index, carrier_frequency, figure, demodulacion=False):
@@ -46,14 +46,14 @@ def plot_frequency(frequency, signal_am, signal_fm, index, carrier_frequency, fi
     ax1 = plt.subplot(211)
     ax1.get_xaxis().set_visible(False)
     plt.vlines(frequency,0, signal_am)
-    plt.title('Señal con modulación AM con índice %f y frecuencia %d'%(index, carrier_frequency))
+    plt.title('Senal con modulacion AM con indice %f y frecuencia %d'%(index, carrier_frequency))
     plt.ylabel('Amplitud')
     ax3 = plt.subplot(212, sharex = ax1)
     plt.vlines(frequency,0, signal_fm)
     if demodulacion:
-        plt.title('Señal con modulación AM con índice %f y frecuencia %d'%(index, carrier_frequency))
+        plt.title('Senal moduladada con modulacion AM con indice %f y frecuencia %d'%(index, carrier_frequency))
     else:
-        plt.title('Señal con modulación FM con índice %f y frecuencia %d'%(index, carrier_frequency))
+        plt.title('Senal con modulacion FM con indice %f y frecuencia %d'%(index, carrier_frequency))
     plt.xlabel('Frecuencia [Hz]')
     plt.ylabel('Amplitud')
 
@@ -68,16 +68,16 @@ def plot_signal(time, signal, signal_am, signal_fm, index, carrier_frequency, fi
         plt.plot(time, signal, label='Original')
         plt.plot(time, carrier, label='Carrier')
         plt.legend()
-    plt.title('Señal original')
+    plt.title('Senal original')
     plt.ylabel('Amplitud')
     ax2 = plt.subplot(312,sharex = ax1)
     ax2.get_xaxis().set_visible(False)
     plt.plot(time, signal_am)
-    plt.title('Señal con modulación AM con índice %f y frecuencia %d'%(index, carrier_frequency))
+    plt.title('Senal con modulacion AM con indice %f y frecuencia %d'%(index, carrier_frequency))
     plt.ylabel('Amplitud')
     ax3 = plt.subplot(313, sharex = ax1)
     plt.plot(time, signal_fm)
-    plt.title('Señal con modulación FM con índice %f y frecuencia %d'%(index, carrier_frequency))
+    plt.title('Senal con modulacion FM con indice %f y frecuencia %d'%(index, carrier_frequency))
     plt.xlabel('Tiempo [s]')
     plt.ylabel('Amplitud')
 
@@ -106,7 +106,6 @@ def test(carrier_frequency, offset):
     plt.vlines(fr, 0, np.abs(fo))
     plot_frequency(fr, np.abs(foa), np.abs(fof), 1.0, carrier_frequency, 3)
     plot_frequency(fr, np.abs(foa), np.abs(foaa), 1.0, carrier_frequency, 4)
-    print(ydm)
     plt.figure(5)
     plt.plot(x, ydm, label='Demodulada')
     plt.plot(x, y, label='Original')
@@ -115,7 +114,7 @@ def test(carrier_frequency, offset):
 
     
 def main():
-    time, signal, integral, delta = initialize_data('../resources/handel.wav')
+    time, signal, integral, rate = initialize_data('../resources/handel.wav')
     signal_am_100 = modulacion_am(signal, time, 1.0, 99100)
     signal_fm_100 = modulacion_fm(integral, time, 1.0, 99100)
     signal_am_015 = modulacion_am(signal, time, 0.15, 99100)
@@ -123,8 +122,10 @@ def main():
     signal_am_125 = modulacion_am(signal, time, 1.25, 99100)
     signal_fm_125 = modulacion_fm(integral, time, 1.25, 99100)
     signal_am_am = modulacion_am(signal_am_100, time, 1.0, 99100)
+    signal_og_am = demodulacion_am(signal_am_100, time, 1.0, 99100, 1900.0, rate)
+    write('../resources/handelRecreado.wav', rate, np.asarray(signal_og_am, dtype=np.int16))
     fourier = fft(signal)
-    frequency = fftfreq(len(signal), delta)
+    frequency = fftfreq(len(signal), 1.0/rate)
     fourier_am_100 = fft(signal_am_100)
     fourier_fm_100 = fft(signal_fm_100)
     fourier_am_015 = fft(signal_am_015)
@@ -136,19 +137,19 @@ def main():
     plot_signal(time, signal, signal_am_015, signal_fm_015, 0.15, 99100, 2)
     plot_signal(time, signal, signal_am_125, signal_fm_125, 1.25, 99100, 3)
     plt.figure(4)
-    plt.plot(frequency, fourier)
-    plt.title('Señal original')
+    plt.vlines(frequency, 0, np.abs(fourier))
+    plt.title('Senal original')
     plt.ylabel('Amplitud')
     plt.xlabel('Tiempo [s]')
-    plot_frequency(frequency, fourier_am_100, fourier_fm_100, 1.0, 99100, 5)
-    plot_frequency(frequency, fourier_am_015, fourier_fm_015, 0.15, 99100, 6)
-    plot_frequency(frequency, fourier_am_125, fourier_fm_125, 1.25, 99100, 7)
-    plot_frequency(frequency, fourier_am_100, fourier_am_am, 1.0, 99100, 8, demodulacion=True)
+    plot_frequency(frequency, np.abs(fourier_am_100), np.abs(fourier_fm_100), 1.0, 99100, 5)
+    plot_frequency(frequency, np.abs(fourier_am_015), np.abs(fourier_fm_015), 0.15, 99100, 6)
+    plot_frequency(frequency, np.abs(fourier_am_125), np.abs(fourier_fm_125), 1.25, 99100,7)
+    plot_frequency(frequency, np.abs(fourier_am_100), np.abs(fourier_am_am), 1.0, 99100, 8, demodulacion=True)
     plt.show()
 
 # Test para mostrar que la modulacion am y fm funcionan
-# test(2,2)
+#test(2,2)
 # Test para mostrar que la demodulacion funciona
-# test(10,0)
+#test(10,0)
 # Programa principal
-#main()
+main()
