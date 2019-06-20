@@ -6,14 +6,22 @@ from scipy.fftpack import fft, fftfreq
 from scipy.signal import butter, filtfilt
 
 
-
-
-def modulacion_am(signal_array, time_array, index, carrier_frequency, test=False, offset=0):
+# Function that modulates a discretized signal represented by time_array and signal_array.
+# The modulation takes into consideration an index and a carrier to compute the new signal.
+# For better visualization of the functionatity of the function, and offset can be given.
+# This offset has to be the peak to peak value.
+# It returns an array
+def modulacion_am(signal_array, time_array, index, carrier_frequency, offset=0):
     aux = index*np.cos(2*np.pi*carrier_frequency*time_array)
     f = lambda x:x+offset
     return list(map(f,signal_array))*aux
 
 
+# Function that demodulates a discritized signal represented by time_array and signal_array.
+# The modulation modulates the already modulated signal given an index and a carrier_frequency.
+# For the demudulation, it applies a lowpass filter that ignores frequencies that surpass the cut limit.
+# It also takes into consideration the rate at which te original signal is sampled
+# It returns an array
 def demodulacion_am(signal_am_array, time_array, index, carrier_frequency, cut, rate):
     aux = 2*modulacion_am(signal_am_array, time_array, index, carrier_frequency)
     b, a = butter(3, cut , 'lowpass', fs=rate)
@@ -21,6 +29,13 @@ def demodulacion_am(signal_am_array, time_array, index, carrier_frequency, cut, 
     return filtered
 
 
+# Function that modulates a discretized signal represented by time_array and integral of the signal.
+# In general, the time_array and integral_array needs to follow this rule:
+# Integral_array[i] is the integral of the signal from 0 to time_array[i]
+# The modulation takes into consideration an index and a carrier to compute the new signal.
+# For better visualization of the functionatity of the function, and offset can be given.
+# This offset has to be the peak to peak value.
+# It returns an array
 def modulacion_fm(integral_array, time_array, index, carrier_frequency):
     aux1 = 2*np.pi*carrier_frequency*time_array
     aux2 = 2*np.pi*index*integral_array
@@ -30,6 +45,11 @@ def modulacion_fm(integral_array, time_array, index, carrier_frequency):
     return np.cos(np.array(suma))
 
 
+# Function that, given a filename, reads its contents and obtain the necessary information about the signal.
+# It return the time and amplitude of the signal, the integral of the signal, and the rate at which it was sampled.
+# For the calculation of the integral, the simps function is used.
+# This is because the simps function calculates the integral of a discretized signal, assuming that the original 
+# signal the x axis is equispaced. It calculates the integral of the whole array, thats the reason a subarray is given.
 def initialize_data(filename):
     rate, signal_array = read(filename)
     delta = 1/rate
@@ -41,6 +61,8 @@ def initialize_data(filename):
     return time_array, signal_array, np.array(integral_array), rate
 
 
+# Function that plots in a 'prettier' way a signal, its am modulation, its fm modulation in the frequency domain
+# If the modulation flag is set, that means the fm modulation is the am modulated signal that was modulated once more.
 def plot_frequency(frequency, signal_am, signal_fm, index, carrier_frequency, figure, demodulacion=False):
     plt.figure(figure)
     ax1 = plt.subplot(211)
@@ -58,6 +80,8 @@ def plot_frequency(frequency, signal_am, signal_fm, index, carrier_frequency, fi
     plt.ylabel('Amplitud')
 
 
+# Function that plots in a 'prettier' way a signal, its am modulation, its fm modulation in the time domain
+# If the carrier exists, that means that the carrier wave was included for plotting
 def plot_signal(time, signal, signal_am, signal_fm, index, carrier_frequency, figure, carrier=[]):
     plt.figure(figure)
     ax1 = plt.subplot(311)
@@ -82,6 +106,14 @@ def plot_signal(time, signal, signal_am, signal_fm, index, carrier_frequency, fi
     plt.ylabel('Amplitud')
 
 
+# Function that test the previous functions given a sinusoidal function.
+# If the modulation is to be tested, a low carrier frequency and an offset of 2 is needed.
+# Thats because the offset is the value peak to peak of the tinusoidal function, and a low 
+# carrier frequency allows to see clearly the plot.
+# If the demodulation is to be teste, a high carrier frequency is needed (at least 10) and an
+# offses of 0 is needed.
+# A high frequency allows por a better aproximation of the demodulated rignal and the offset allows that
+# the original signal and the demodulated one superimpose one another in the plot
 def test(carrier_frequency, offset):
     f = lambda z: np.cos(0.05*z*np.pi)
     x = np.linspace(0, 80, 20000)
@@ -112,7 +144,8 @@ def test(carrier_frequency, offset):
     plt.legend()
     plt.show()
 
-    
+
+# Funciont that runs the main objective of the project
 def main():
     time, signal, integral, rate = initialize_data('../resources/handel.wav')
     signal_am_100 = modulacion_am(signal, time, 1.0, 99100)
