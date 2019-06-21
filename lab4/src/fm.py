@@ -63,14 +63,20 @@ def initialize_data(filename):
 
 # Function that plots in a 'prettier' way a signal, its am modulation, its fm modulation in the frequency domain
 # If the modulation flag is set, that means the fm modulation is the am modulated signal that was modulated once more.
-def plot_frequency(frequency, signal_am, signal_fm, index, carrier_frequency, figure, demodulacion=False):
+def plot_frequency(frequency, signal, signal_am, signal_fm, index, carrier_frequency, figure, demodulacion=False):
     plt.figure(figure)
-    ax1 = plt.subplot(211)
+    ax1 = plt.subplot(311)
     ax1.get_xaxis().set_visible(False)
+    plt.vlines(frequency, 0, np.abs(signal))
+    plt.title('Senal original')
+    plt.ylabel('Amplitud')
+    plt.xlabel('Tiempo [s]')
+    ax2 = plt.subplot(312, sharex = ax1)
+    ax2.get_xaxis().set_visible(False)
     plt.vlines(frequency,0, signal_am)
     plt.title('Senal con modulacion AM con indice %f y frecuencia %d'%(index, carrier_frequency))
     plt.ylabel('Amplitud')
-    ax3 = plt.subplot(212, sharex = ax1)
+    ax3 = plt.subplot(313, sharex = ax1)
     plt.vlines(frequency,0, signal_fm)
     if demodulacion:
         plt.title('Senal moduladada con modulacion AM con indice %f y frecuencia %d'%(index, carrier_frequency))
@@ -134,13 +140,14 @@ def test(carrier_frequency, offset):
     fr = fftfreq(len(y), delta)
     carrier = np.cos(2*np.pi*carrier_frequency*x)
     plot_signal(x, y, ya, yf, 1.0, carrier_frequency, 1)
-    plt.figure(2)
-    plt.vlines(fr, 0, np.abs(fo))
-    plot_frequency(fr, np.abs(foa), np.abs(fof), 1.0, carrier_frequency, 3)
-    plot_frequency(fr, np.abs(foa), np.abs(foaa), 1.0, carrier_frequency, 4)
-    plt.figure(5)
+    plot_frequency(fr, np.abs(fo), np.abs(foa), np.abs(fof), 1.0, carrier_frequency, 2)
+    plot_frequency(fr, np.abs(fo), np.abs(foa), np.abs(foaa), 1.0, carrier_frequency, 3)
+    plt.figure(4)
     plt.plot(x, ydm, label='Demodulada')
     plt.plot(x, y, label='Original')
+    plt.title('Comparación resultados con señal original')
+    plt.xlabel('Tiempo [s]')
+    plt.ylabel('Amplitud')
     plt.legend()
     plt.show()
 
@@ -169,15 +176,10 @@ def main():
     plot_signal(time, signal, signal_am_100, signal_fm_100, 1.0, 99100, 1)
     plot_signal(time, signal, signal_am_015, signal_fm_015, 0.15, 99100, 2)
     plot_signal(time, signal, signal_am_125, signal_fm_125, 1.25, 99100, 3)
-    plt.figure(4)
-    plt.vlines(frequency, 0, np.abs(fourier))
-    plt.title('Senal original')
-    plt.ylabel('Amplitud')
-    plt.xlabel('Tiempo [s]')
-    plot_frequency(frequency, np.abs(fourier_am_100), np.abs(fourier_fm_100), 1.0, 99100, 5)
-    plot_frequency(frequency, np.abs(fourier_am_015), np.abs(fourier_fm_015), 0.15, 99100, 6)
-    plot_frequency(frequency, np.abs(fourier_am_125), np.abs(fourier_fm_125), 1.25, 99100,7)
-    plot_frequency(frequency, np.abs(fourier_am_100), np.abs(fourier_am_am), 1.0, 99100, 8, demodulacion=True)
+    plot_frequency(frequency, np.abs(fourier), np.abs(fourier_am_100), np.abs(fourier_fm_100), 1.0, 99100, 4)
+    plot_frequency(frequency, np.abs(fourier), np.abs(fourier_am_015), np.abs(fourier_fm_015), 0.15, 99100, 5)
+    plot_frequency(frequency, np.abs(fourier), np.abs(fourier_am_125), np.abs(fourier_fm_125), 1.25, 99100, 6)
+    plot_frequency(frequency, np.abs(fourier), np.abs(fourier_am_100), np.abs(fourier_am_am), 1.0, 99100, 7, demodulacion=True)
     plt.show()
 
 # Test para mostrar que la modulacion am y fm funcionan
