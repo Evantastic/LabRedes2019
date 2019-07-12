@@ -97,7 +97,7 @@ plt.xlabel("Tiempo (s)")
 plt.show()
 
 # Se considera un arreglo con 6 niveles de SNR y un arreglo para almacenar los errores
-SNR = [1/100., 1/50., 1/25., 1/10., 1/5., 1.]
+SNR = [1/250., 1/150., 1/100., 1/50., 1/25., 1/10.]
 errors = []
 # Para cada SNR se le agrega un ruido de SNR a la senal modulada, se demodula la senal con ruido, se verifica el error y se agregan al arreglo errores
 for snr in SNR:
@@ -106,9 +106,9 @@ for snr in SNR:
     error = errorT(bitsDemodulated,sDemodulated)
     errors.append(error)
 #Se muestra por consola los valores de BER y SNR
+print("SNR: "+str(SNR))
+print("Errores: "+str(errors))
 if bitQuantity < 101:
-    print("SNR: "+str(SNR))
-    print("Errores: "+str(errors))
     print("Senal original: \t\t"+str(bitString))
     print("Senal demodulada: \t\t"+str(bitsDemodulated))
     print("Senal con ruido demodulada: \t"+str(sDemodulated))
