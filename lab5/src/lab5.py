@@ -86,7 +86,7 @@ plt.show()
 bitsDemodulated = demodulator(array, points)
 
 #Se le agrega ruido a la senal con un valor de prueba SNR = 4
-snrValue = 1/100
+snrValue = 1/100.
 noisySignal = noise(array,snrValue)
 
 # A continuación viene el ploteo de la senal con ruido
@@ -97,7 +97,7 @@ plt.xlabel("Tiempo (s)")
 plt.show()
 
 # Se considera un arreglo con 6 niveles de SNR y un arreglo para almacenar los errores
-SNR = [1,2,4,6,8,10]
+SNR = [1/100., 1/50., 1/25., 1/10., 1/5., 1.]
 errors = []
 # Para cada SNR se le agrega un ruido de SNR a la senal modulada, se demodula la senal con ruido, se verifica el error y se agregan al arreglo errores
 for snr in SNR:
