@@ -11,7 +11,7 @@ def modulator(bit, frequency, rate, points):
     t = 0
     ts = np.linspace(t, t+rate,points)
     t+=rate
-    return 50*bit*np.cos(frequency*ts)
+    return 500*bit*np.cos(frequency*ts)
 
 #
 # Demodulacion de una senal a partir de los valores del arreglo de modulacion
@@ -20,15 +20,13 @@ def modulator(bit, frequency, rate, points):
 # Si los valores corresponden a 0, originalmente venia un 0
 # Si los valores corresponden a otro valor, originalmente venia un 1
 # Retorna la senal demodulada, es decir, la original
-def demodulator(array,points):
-    aux = 0
+def demodulator(array, points):
+    i = 0
     outputBits = ''
-    while (aux < len(array)):
-        if(array[aux] == 0.0 or array[aux] == -0.0):
-            outputBits += '0'
-        else:
-            outputBits += '1'
-        aux = aux + points + 1
+    while i < len(array):
+        bit = array[i:i + points]
+        outputBits += '1' if list(filter(lambda x:x > 450.0, bit)) != []  else '0'
+        i += points
     return outputBits
 
 #
@@ -85,8 +83,7 @@ plt.xlabel("Tiempo (s)")
 plt.show()
 
 # A continuacion vienen los bits obtenidos desde la senal, los cuales son demodulados e identifica cuales eran originalmente
-bitsDemodulated = demodulator(array,points)
-print("Demodulacion: La senal es "+bitsDemodulated)
+bitsDemodulated = demodulator(array, points)
 
 #Se le agrega ruido a la senal con un valor de prueba SNR = 4
 snrValue = 4
@@ -111,7 +108,12 @@ for snr in SNR:
 #Se muestra por consola los valores de BER y SNR
 print("SNR: "+str(SNR))
 print("Errores: "+str(errors))
+print("Senal original: \t\t"+str(bitString))
+print("Senal demodulada: \t\t"+str(bitsDemodulated))
+print("Senal con ruido demodulada: \t"+str(sDemodulated))
 #Se muestra el grafico BER vs SNR
-plt.plot(errors,SNR)
+plt.plot(SNR, errors)
 plt.title("BER vs SNR")
+plt.xlabel("SNR")
+plt.ylabel("BER")
 plt.show()
