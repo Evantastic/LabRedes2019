@@ -100,18 +100,18 @@ plt.show()
 SNR = [1/250., 1/150., 1/100., 1/50., 1/25., 1/10.]
 errors = []
 # Para cada SNR se le agrega un ruido de SNR a la senal modulada, se demodula la senal con ruido, se verifica el error y se agregan al arreglo errores
+if bitQuantity < 101:
+    print("Senal original: \t\t"+str(bitString))
+    print("Senal demodulada: \t\t"+str(bitsDemodulated))
 for snr in SNR:
     sModulated = noise(array,snr)
     sDemodulated = demodulator(sModulated,points)
+    print("Senal con ruido demodulada: \t"+str(sDemodulated))
     error = errorT(bitsDemodulated,sDemodulated)
     errors.append(error)
 #Se muestra por consola los valores de BER y SNR
 print("SNR: "+str(SNR))
 print("Errores: "+str(errors))
-if bitQuantity < 101:
-    print("Senal original: \t\t"+str(bitString))
-    print("Senal demodulada: \t\t"+str(bitsDemodulated))
-    print("Senal con ruido demodulada: \t"+str(sDemodulated))
 #Se muestra el grafico BER vs SNR
 plt.plot(SNR, errors)
 plt.title("BER vs SNR")
