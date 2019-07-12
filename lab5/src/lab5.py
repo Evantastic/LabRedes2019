@@ -37,7 +37,7 @@ def noise(signal,snr):
 #
 # Identificacion de tasa de error entre senal original y modulada
 #
-def error(demodulated,demodulatedN):
+def errorT(demodulated,demodulatedN):
     error = 0
     for i in range(len(demodulated)):
         if demodulated[i] != demodulatedN[i]:
@@ -84,14 +84,16 @@ plt.plot(time,noisySignal)
 plt.title("Senal con ruido SRN = "+str(snrValue))
 plt.show()
 
-# Se generan n random bits
-randomBits = []
-for i in range(10):
-    bit = str(random.randint(0,1))
-    randomBits.append(bit)
-    ''.join(bitString)
+# Se consideran los niveles de SNR
+SNR = [1,2,4,6,8,10]
+errors = []
+for snr in SNR:
+    sModulated = noise(array,snr)
+    sDemodulated = demodulator(sModulated,points)
+    error = errorT(bitsDemodulated,sDemodulated)
+    errors.append(error)
 
-'''Falta:
-Simule la transmisión de los bits aplicando el modulador, demodulador y el canal AWGN para varios niveles ruido.
-Considere al menos 6 niveles de SNR entre -2 y 10 dB.
-Para cada SNR determine la tasa de errores de bit (BER) de su demodulador comparando los bits demodulados con los bits originales.'''
+#Se muestra el grafico BER vs SNR
+plt.plot(errors,SNR)
+plt.title("BER vs SNR")
+plt.show()
