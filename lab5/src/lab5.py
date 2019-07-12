@@ -77,7 +77,7 @@ for c in bitArray:
 # A continuación viene el ploteo de la senal modulada, junto con los bits de la senal original
 time = np.linspace(0, bitQuantity*rate, points*bitQuantity)
 plt.plot(time, array)
-plt.title("Senal original : "+bitString)
+plt.title("Senal original")
 plt.ylabel("Amplitud")
 plt.xlabel("Tiempo (s)")
 plt.show()
@@ -86,7 +86,7 @@ plt.show()
 bitsDemodulated = demodulator(array, points)
 
 #Se le agrega ruido a la senal con un valor de prueba SNR = 4
-snrValue = 4
+snrValue = 1/100
 noisySignal = noise(array,snrValue)
 
 # A continuación viene el ploteo de la senal con ruido
@@ -106,11 +106,12 @@ for snr in SNR:
     error = errorT(bitsDemodulated,sDemodulated)
     errors.append(error)
 #Se muestra por consola los valores de BER y SNR
-print("SNR: "+str(SNR))
-print("Errores: "+str(errors))
-print("Senal original: \t\t"+str(bitString))
-print("Senal demodulada: \t\t"+str(bitsDemodulated))
-print("Senal con ruido demodulada: \t"+str(sDemodulated))
+if bitQuantity < 101:
+    print("SNR: "+str(SNR))
+    print("Errores: "+str(errors))
+    print("Senal original: \t\t"+str(bitString))
+    print("Senal demodulada: \t\t"+str(bitsDemodulated))
+    print("Senal con ruido demodulada: \t"+str(sDemodulated))
 #Se muestra el grafico BER vs SNR
 plt.plot(SNR, errors)
 plt.title("BER vs SNR")
