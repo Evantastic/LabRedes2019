@@ -89,7 +89,7 @@ bitsDemodulated = demodulator(array,points)
 print("Demodulacion: La senal es "+bitsDemodulated)
 
 #Se le agrega ruido a la senal con un valor de prueba SNR = 4
-snrValue = int(input("Ingrese un valor de prueba de SNR: "))
+snrValue = 4
 noisySignal = noise(array,snrValue)
 
 # A continuación viene el ploteo de la senal con ruido
