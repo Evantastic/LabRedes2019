@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import numpy as np
+import random
 from random import choice
 
 #
@@ -34,6 +35,17 @@ def noise(signal,snr):
     return noiseSignal
 
 #
+# Identificacion de tasa de error entre senal original y modulada
+#
+def error(demodulated,demodulatedN):
+    error = 0
+    for i in range(len(demodulated)):
+        if demodulated[i] != demodulatedN[i]:
+            error += 1
+    errorRate = error/len(demodulated)
+    return errorRate
+
+#
 #Generacion de senal y bits
 #
 bitQuantity = 5
@@ -56,7 +68,7 @@ for c in bitArray:
 # A continuación viene el ploteo de la senal modulada
 time = np.linspace(0, bitQuantity*rate, points*bitQuantity)
 plt.plot(time, array)
-plt.title(bitString)
+plt.title("Senal original : "+bitString)
 plt.show()
 
 # A continuacion vienen los bits obtenidos desde la senal
@@ -64,10 +76,22 @@ bitsDemodulated = demodulator(array,points)
 print("La senal es "+bitsDemodulated)
 
 #Senal con ruido
-snrValue = 10.0
+snrValue = 4
 noisySignal = noise(array,snrValue)
 
 # A continuación viene el ploteo de la senal con ruido
 plt.plot(time,noisySignal)
-plt.title("Signal with Noise with snr = "+str(snrValue))
+plt.title("Senal con ruido SRN = "+str(snrValue))
 plt.show()
+
+# Se generan n random bits
+randomBits = []
+for i in range(10):
+    bit = str(random.randint(0,1))
+    randomBits.append(bit)
+    ''.join(bitString)
+
+'''Falta:
+Simule la transmisión de los bits aplicando el modulador, demodulador y el canal AWGN para varios niveles ruido.
+Considere al menos 6 niveles de SNR entre -2 y 10 dB.
+Para cada SNR determine la tasa de errores de bit (BER) de su demodulador comparando los bits demodulados con los bits originales.'''
